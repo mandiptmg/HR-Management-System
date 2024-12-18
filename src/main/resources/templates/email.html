@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Personalized Email</title>
+</head>
+<body>
+    <p th:text="'Dear ' + ${recipientName} + ','"></p>
+
+    <p th:text="${personalizedMessage}"></p>
+
+    <p>Your Details:</p>
+    <ul>
+        <li th:text="'Name: ' + ${name}"></li>
+        <li th:text="'Email: ' + ${email}"></li>
+        <li th:text="'Age: ' + ${age}"></li>
+    </ul>
+
+    <p>Attached: Your Cover Letter and Photo</p>
+
+    <p>Best regards,</p>
+    <p>Your Name</p>
+</body>
+</html>
