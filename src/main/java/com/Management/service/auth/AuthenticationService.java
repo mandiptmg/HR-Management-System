@@ -75,7 +75,7 @@ public class AuthenticationService {
         user.setEmail(signUpDTO.getEmail());
         user.setPassword(passwordEncoder.encode(signUpDTO.getPassword()));
         user.setEnabled(false);
-        user.setRole(role); // Assign role
+        user.setRole(role);
         user.setVerificationCode(generateVerificationCode());
         user.setExpiryDate(LocalDateTime.now().plusMinutes(VERIFICATION_EXPIRY_MINUTES));
 

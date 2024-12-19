@@ -74,7 +74,15 @@ public class AuthenticationController {
 
         // Check if the token has expired
         if (user.getExpiryDate().isBefore(LocalDateTime.now())) {
-            return buildResponse("error", HttpStatus.BAD_REQUEST, "Token has expired.", null);
+            // If the user's account is disabled, delete the user
+            if (!user.isEnabled()) {
+                userRepository.delete(user);
+                return buildResponse("error", HttpStatus.BAD_REQUEST,
+                        "Token has expired. Disabled user has been deleted.", null);
+            } else {
+                return buildResponse("error", HttpStatus.BAD_REQUEST, "Token has expired, but the user is active.",
+                        null);
+            }
         }
 
         // Activate the user account
