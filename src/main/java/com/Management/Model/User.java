@@ -1,5 +1,9 @@
 package com.Management.Model;
 
+import java.time.LocalDateTime;
+
+import jakarta.persistence.Column;
+
 // import java.time.LocalDateTime;
 
 // import jakarta.persistence.Column;
@@ -43,17 +47,26 @@ public class User {
     @Size(min = 6, message = "Password must be at least 6 characters long")
     private String password;
 
-    // @Column(name = "verification_code")
-    // private String verificationCode;
+    @Column(name = "verification_code")
+    private String verificationCode;
 
-    // @Column(name = "verification_expiration")
-    // private LocalDateTime verificationCodeExpiresAt;
+    @Column(name = "verification_expiration")
+    private LocalDateTime expiryDate;
 
     private boolean enabled = false;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id")
     private Role role;
+
+    public void addOneHourToExpiryDate() {
+        if (this.expiryDate != null) {
+            this.expiryDate = this.expiryDate.plusHours(1);
+        } else {
+            this.expiryDate = LocalDateTime.now().plusHours(1);
+        }
+    }
+
 
     // @ManyToMany(fetch = FetchType.EAGER)
     // @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"),
