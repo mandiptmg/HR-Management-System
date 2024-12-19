@@ -45,11 +45,10 @@ public class AuthenticationService {
             throw new RuntimeException("Email not found");
         }
 
-        if (!user.isEnabled()) {
-            throw new RuntimeException("Account not verified. Please verify your account.");
-        }
-
-        user.setEnabled(true);
+        // if (!user.isEnabled()) {
+        // throw new RuntimeException("Account not verified. Please verify your
+        // account.");
+        // }
 
         Authentication authentication = authManager
                 .authenticate(new UsernamePasswordAuthenticationToken(loginDTO.getEmail(), loginDTO.getPassword()));
