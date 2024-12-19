@@ -3,23 +3,31 @@ package com.Management.controller.auth;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.Management.Model.ApiResponse;
+import com.Management.Model.User;
 import com.Management.dto.LoginDTO;
 import com.Management.dto.SignUpDTO;
+import com.Management.repository.UserRepository;
 import com.Management.service.auth.AuthenticationService;
 
 import jakarta.validation.Valid;
 
 @RestController
 public class AuthenticationController {
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private AuthenticationService authService;
@@ -50,6 +58,33 @@ public class AuthenticationController {
             return buildResponse("error", HttpStatus.BAD_REQUEST, "User registered fail. please try agin ", null);
         }
 
+    }
+
+    @GetMapping("/verify-email")
+    public ResponseEntity<ApiResponse<User>> verifyEmail(@RequestParam("token") String token) {
+        // Find user by verification code
+        Optional<User> optionalUser = userRepository.findByVerificationCode(token);
+
+        // Check if the token is invalid
+        if (optionalUser.isEmpty()) {
+            return buildResponse("error", HttpStatus.BAD_REQUEST, "Invalid token.", null);
+        }
+
+        User user = optionalUser.get();
+
+        // Check if the token has expired
+        if (user.getExpiryDate().isBefore(LocalDateTime.now())) {
+            return buildResponse("error", HttpStatus.BAD_REQUEST, "Token has expired.", null);
+        }
+
+        // Activate the user account
+        user.setEnabled(true);
+        user.setVerificationCode(null); // Clear the verification code
+        user.setExpiryDate(null); // Clear expiry date
+        userRepository.save(user);
+
+        // Return success response
+        return buildResponse("success", HttpStatus.OK, "Email verified successfully. You can now log in.", null);
     }
 
     // Helper method to create response
