@@ -5,12 +5,11 @@ import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-// import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-// import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.Management.Model.Role;
-// import com.Management.Model.Role;
 import com.Management.Model.User;
 import com.Management.dto.SignUpDTO;
 import com.Management.dto.UserDTO;
@@ -29,6 +28,8 @@ public class UserService {
     @Autowired
     private ModelMapper modelMapper;
 
+    private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
+
     // Get all users and map them to UserDTO
     public List<UserDTO> getAllUsers() {
         List<User> users = userRepository.findAll();
@@ -44,7 +45,6 @@ public class UserService {
     }
 
     public SignUpDTO createUser(SignUpDTO signUpDTO) {
-        // user.setPassword(passwordEncoder.encode(user.getPassword()));
         // Check if email already exists
         if (userRepository.existsByEmail(signUpDTO.getEmail())) {
             throw new RuntimeException("The provided email is already in use.");
@@ -54,7 +54,7 @@ public class UserService {
         User user = new User();
         user.setName(signUpDTO.getName());
         user.setEmail(signUpDTO.getEmail());
-        user.setPassword(signUpDTO.getPassword()); // Secure this later with password hashing
+        user.setPassword(passwordEncoder.encode(signUpDTO.getPassword())); // Secure this later with password hashing
         user.setEnabled(false);
 
         // Assign Role
@@ -83,10 +83,11 @@ public class UserService {
         // Update user details
         existingUser.setName(signUpDTO.getName());
         existingUser.setEmail(signUpDTO.getEmail());
+        existingUser.setEnabled(false);
 
         // Update password if provided (and hash it)
         if (signUpDTO.getPassword() != null && !signUpDTO.getPassword().isBlank()) {
-            existingUser.setPassword(signUpDTO.getPassword());
+            existingUser.setPassword(passwordEncoder.encode(signUpDTO.getPassword()));
         }
 
         // Update role if provided
