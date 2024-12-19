@@ -4,24 +4,15 @@ import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 
-// import java.time.LocalDateTime;
-
-// import jakarta.persistence.Column;
-
-// import java.util.Set;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-// import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-// import jakarta.persistence.JoinColumn;
-// import jakarta.persistence.JoinTable;
-// import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
+// import jakarta.persistence.Transient;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -46,6 +37,11 @@ public class User {
     @NotBlank
     @Size(min = 6, message = "Password must be at least 6 characters long")
     private String password;
+
+    // @Transient
+    // @NotBlank(message = "Confirm Password cannot be blank")
+    // @Size(min = 6, message = "Confirm Password must match the password length")
+    // private String confirmPassword;
 
     @Column(name = "verification_code")
     private String verificationCode;

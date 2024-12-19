@@ -130,10 +130,8 @@ public class AuthenticationService {
         }
     }
 
-    
-
     private String generateVerificationLink(String verificationCode) {
-        return "http://localhost:8080/api/auth/verify-email?token=" + verificationCode;
+        return "http://localhost:5173/verify-email?token=" + verificationCode;
     }
 
     // generate verification token
