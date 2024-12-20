@@ -56,6 +56,35 @@ public class AuthenticationService {
     private static final String DEFAULT_ROLE = "USER";
     private static final long VERIFICATION_EXPIRY_MINUTES = 15;
 
+
+     // login
+     public String login(LoginDTO loginDTO) {
+        UserDetails userDetails = userDetailsService.loadUserByUsername(loginDTO.getEmail()); // Use email instead of
+                                                                                              // username
+
+        // Validate password securely
+        if (!passwordEncoder.matches(loginDTO.getPassword(), userDetails.getPassword())) {
+            throw new RuntimeException("Invalid email or password"); // Consider a custom exception for better handling
+        }
+        User user = userRepository.findByEmail(loginDTO.getEmail());
+        if (user == null) {
+            throw new RuntimeException("Email not found");
+        }
+        if (!user.isEnabled()) {
+            throw new RuntimeException("Account not verified. Please verify your account.");
+        }
+
+        Authentication authentication = authManager
+                .authenticate(new UsernamePasswordAuthenticationToken(loginDTO.getEmail(), loginDTO.getPassword()));
+        if (authentication.isAuthenticated()) {
+            return jwtService.generateToken(loginDTO.getEmail());
+        } else {
+            throw new RuntimeException("Failed to login.");
+
+        }
+    }
+
+
     public SignUpDTO register(SignUpDTO signUpDTO) {
         // Check if email already exists
         if (userRepository.existsByEmail(signUpDTO.getEmail())) {
@@ -89,33 +118,7 @@ public class AuthenticationService {
         return modelMapper.map(savedUser, SignUpDTO.class);
     }
 
-    // login
-    public String login(LoginDTO loginDTO) {
-        UserDetails userDetails = userDetailsService.loadUserByUsername(loginDTO.getEmail()); // Use email instead of
-                                                                                              // username
-
-        // Validate password securely
-        if (!passwordEncoder.matches(loginDTO.getPassword(), userDetails.getPassword())) {
-            throw new RuntimeException("Invalid email or password"); // Consider a custom exception for better handling
-        }
-        User user = userRepository.findByEmail(loginDTO.getEmail());
-        if (user == null) {
-            throw new RuntimeException("Email not found");
-        }
-        if (!user.isEnabled()) {
-            throw new RuntimeException("Account not verified. Please verify your account.");
-        }
-
-        Authentication authentication = authManager
-                .authenticate(new UsernamePasswordAuthenticationToken(loginDTO.getEmail(), loginDTO.getPassword()));
-        if (authentication.isAuthenticated()) {
-            return jwtService.generateToken(loginDTO.getEmail());
-        } else {
-            throw new RuntimeException("Failed to login.");
-
-        }
-    }
-
+   
     private void sendVerificationEmail(String email, String link) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
@@ -133,6 +136,23 @@ public class AuthenticationService {
     private String generateVerificationLink(String verificationCode) {
         return "http://localhost:5173/verify-email?token=" + verificationCode;
     }
+
+    // public void resendVerificationCode(String email) {
+    //     User user = userRepository.findByEmail(email());
+
+    //     if (optionalUser.isPresent()) {
+    //         User user = optionalUser.get();
+    //         if (user.isEnabled()) {
+    //             throw new RuntimeException("Account is already verified");
+    //         }
+    //         user.setVerificationCode(generateVerificationCode());
+    //         user.setExpiryDate(null);(LocalDateTime.now().plusHours(1));
+    //         sendVerificationEmail(user);
+    //         userRepository.save(user);
+    //     } else {
+    //         throw new RuntimeException("User not found");
+    //     }
+    // }
 
     // generate verification token
     private String generateVerificationCode() {

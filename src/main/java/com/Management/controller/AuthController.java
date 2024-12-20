@@ -24,7 +24,7 @@ import com.Management.service.UserService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/auth/users")
+@RequestMapping("/users")
 public class AuthController {
 
     @Autowired
