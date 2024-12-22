@@ -43,10 +43,10 @@ public class User {
     // @Size(min = 6, message = "Confirm Password must match the password length")
     // private String confirmPassword;
 
-    @Column(name = "verification_code")
+    @Column(name = "vercode")
     private String verificationCode;
 
-    @Column(name = "verification_expiration")
+    @Column(name = "verExpiry")
     private LocalDateTime expiryDate;
 
     private boolean enabled = false;

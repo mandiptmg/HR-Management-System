@@ -56,9 +56,8 @@ public class AuthenticationService {
     private static final String DEFAULT_ROLE = "USER";
     private static final long VERIFICATION_EXPIRY_MINUTES = 15;
 
-
-     // login
-     public String login(LoginDTO loginDTO) {
+    // login
+    public String login(LoginDTO loginDTO) {
         UserDetails userDetails = userDetailsService.loadUserByUsername(loginDTO.getEmail()); // Use email instead of
                                                                                               // username
 
@@ -83,7 +82,6 @@ public class AuthenticationService {
 
         }
     }
-
 
     public SignUpDTO register(SignUpDTO signUpDTO) {
         // Check if email already exists
@@ -118,7 +116,6 @@ public class AuthenticationService {
         return modelMapper.map(savedUser, SignUpDTO.class);
     }
 
-   
     private void sendVerificationEmail(String email, String link) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
@@ -138,20 +135,20 @@ public class AuthenticationService {
     }
 
     // public void resendVerificationCode(String email) {
-    //     User user = userRepository.findByEmail(email());
+    // User user = userRepository.findByEmail(email());
 
-    //     if (optionalUser.isPresent()) {
-    //         User user = optionalUser.get();
-    //         if (user.isEnabled()) {
-    //             throw new RuntimeException("Account is already verified");
-    //         }
-    //         user.setVerificationCode(generateVerificationCode());
-    //         user.setExpiryDate(null);(LocalDateTime.now().plusHours(1));
-    //         sendVerificationEmail(user);
-    //         userRepository.save(user);
-    //     } else {
-    //         throw new RuntimeException("User not found");
-    //     }
+    // if (optionalUser.isPresent()) {
+    // User user = optionalUser.get();
+    // if (user.isEnabled()) {
+    // throw new RuntimeException("Account is already verified");
+    // }
+    // user.setVerificationCode(generateVerificationCode());
+    // user.setExpiryDate(null);(LocalDateTime.now().plusHours(1));
+    // sendVerificationEmail(user);
+    // userRepository.save(user);
+    // } else {
+    // throw new RuntimeException("User not found");
+    // }
     // }
 
     // generate verification token

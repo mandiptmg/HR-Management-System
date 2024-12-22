@@ -1,13 +1,12 @@
 package com.Management.controller.auth;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,10 +15,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.Management.Model.ApiResponse;
+import com.Management.Model.RefreshToken;
 import com.Management.Model.User;
+import com.Management.dto.JwtResponseDTO;
 import com.Management.dto.LoginDTO;
+import com.Management.dto.RefreshTokenRequestDTO;
 import com.Management.dto.SignUpDTO;
 import com.Management.repository.UserRepository;
+import com.Management.service.RefreshTokenService;
+import com.Management.service.Jwt.JwtService;
 import com.Management.service.auth.AuthenticationService;
 
 import jakarta.validation.Valid;
@@ -32,20 +36,41 @@ public class AuthenticationController {
     private UserRepository userRepository;
 
     @Autowired
+    private JwtService jwtService;
+
+    @Autowired
     private AuthenticationService authService;
 
-    @PostMapping("/login")
-    public ResponseEntity<Map<String, Object>> login(@RequestBody LoginDTO loginDTO) {
-        String token = authService.login(loginDTO);
-        Map<String, Object> response = new HashMap<>();
-        response.put("message", "Login Success");
-        response.put("token", token);
-        if (token != null) {
-            return ResponseEntity.status(HttpStatus.OK).body(response);
-        } else {
+    @Autowired
+    private RefreshTokenService refreshTokenService;
 
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+    @PostMapping("/login")
+    public JwtResponseDTO login(@RequestBody LoginDTO loginDTO) {
+        String token = authService.login(loginDTO);
+
+        if (token != null) {
+            RefreshToken refreshToken = refreshTokenService.createRefreshToken(loginDTO.getEmail());
+            return JwtResponseDTO.builder()
+                    .accessToken(jwtService.generateToken(loginDTO.getEmail()))
+                    .token(refreshToken.getToken())
+                    .build();
+
+        } else {
+            throw new UsernameNotFoundException("invalid user request..!!");
         }
+    }
+
+    @PostMapping("/refreshToken")
+    public JwtResponseDTO refreshToken(@RequestBody RefreshTokenRequestDTO refreshTokenRequestDTO) {
+        return refreshTokenService.findByToken(refreshTokenRequestDTO.getToken())
+                .map(refreshTokenService::verifyExpiration)
+                .map(RefreshToken::getUser)
+                .map(user -> {
+                    String accessToken = jwtService.generateToken(user.getEmail());
+                    return JwtResponseDTO.builder()
+                            .accessToken(accessToken)
+                            .token(refreshTokenRequestDTO.getToken()).build();
+                }).orElseThrow(() -> new RuntimeException("Refresh Token is not in DB..!!"));
     }
 
     // register
