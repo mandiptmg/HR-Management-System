@@ -23,6 +23,9 @@ public class JwtService {
 
     private String secretkey = "";
 
+    private static final long ACCESS_TOKEN_EXPIRATION = 1000 * 60 * 15; // 15 minutes
+    private static final long REFRESH_TOKEN_EXPIRATION = 1000 * 60 * 60 * 24 * 7; // 7 days
+
     public JwtService() {
 
         try {
@@ -34,22 +37,27 @@ public class JwtService {
         }
     }
 
-    public String generateToken(String email) {
-        Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, email);
-    }
-
-    private String createToken(Map<String, Object> claims, String email) {
-
+    // 🔑 Generic Method for Token Generation
+    private String generateToken(Map<String, Object> claims, String email, long expirationTime) {
         return Jwts.builder()
-                .claims()
-                .add(claims)
+                .claims(claims)
                 .subject(email)
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 1))
-                .and()
+                .expiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(getKey())
                 .compact();
+    }
+
+    // 🔐 Generate Access Token
+    public String generateAccessToken(String email) {
+        return generateToken(new HashMap<>(), email, ACCESS_TOKEN_EXPIRATION);
+    }
+
+    // 🔄 Generate Refresh Token
+    public String generateRefreshToken(String email) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("type", "refresh"); // Add token type metadata
+        return generateToken(claims, email, REFRESH_TOKEN_EXPIRATION);
     }
 
     private SecretKey getKey() {

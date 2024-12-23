@@ -2,6 +2,7 @@ package com.Management.Model;
 
 import java.time.LocalDateTime;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 
 import jakarta.persistence.Entity;
@@ -11,6 +12,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 // import jakarta.persistence.Transient;
 import jakarta.validation.constraints.Email;
@@ -54,6 +56,10 @@ public class User {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id")
     private Role role;
+
+    @OneToOne( mappedBy = "user", cascade = CascadeType.ALL)
+    private RefreshToken refreshToken;
+
 
     public void addOneHourToExpiryDate() {
         if (this.expiryDate != null) {
